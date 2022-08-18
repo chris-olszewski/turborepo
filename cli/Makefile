@@ -27,6 +27,9 @@ GENERATED_FILES = internal/turbodprotocol/turbod.pb.go internal/turbodprotocol/t
 turbo: $(GENERATED_FILES) $(SRC_FILES) go.mod
 	CGO_ENABLED=$(USE_CGO) go build $(GO_FLAGS) ./cmd/turbo
 
+turbo-debug: $(GENERATED_FILES) $(SRC_FILES) go.mod
+	CGO_ENABLED=$(USE_CGO) go build -gcflags=all="-N -l" ./cmd/turbo
+
 protoc: internal/turbodprotocol/turbod.proto
 	protoc --go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \

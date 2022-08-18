@@ -83,6 +83,8 @@ func (f *fsCache) Put(target, hash string, duration int, files []string) error {
 
 	for i := 0; i < numDigesters; i++ {
 		g.Go(func() error {
+			// what if all of these Go funcs error out
+			// nobody to take anything off of the queue
 			for file := range fileQueue {
 				statedFile := fs.LstatCachedFile{Path: f.repoRoot.Join(file)}
 				fromType, err := statedFile.GetType()
@@ -103,10 +105,13 @@ func (f *fsCache) Put(target, hash string, duration int, files []string) error {
 		})
 	}
 
-	for _, file := range files {
-		fileQueue <- file
-	}
-	close(fileQueue)
+	// make this non blocking go func
+	go func() {
+		for _, file := range files {
+			fileQueue <- file
+		}
+		close(fileQueue)
+	}()
 
 	if err := g.Wait(); err != nil {
 		return err
