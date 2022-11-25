@@ -53,7 +53,7 @@ var nodejsNpm = PackageManager{
 		return true, nil
 	},
 
-	readLockfile: func(contents []byte) (lockfile.Lockfile, error) {
+	readLockfile: func(rootPackageJSON *fs.PackageJSON, contents []byte) (lockfile.Lockfile, error) {
 		return lockfile.DecodeNpmLockfile(contents)
 	},
 }

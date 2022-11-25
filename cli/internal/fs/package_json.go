@@ -21,6 +21,7 @@ type PackageJSON struct {
 	Os                   []string          `json:"os"`
 	Workspaces           Workspaces        `json:"workspaces"`
 	Private              bool              `json:"private"`
+	Resolutions          map[string]string `json:"resolutions"`
 	// Exact JSON object stored in package.json including unknown fields
 	// During marshalling struct fields will take priority over raw fields
 	RawJSON map[string]interface{} `json:"-"`
