@@ -314,7 +314,16 @@ func (l *BerryLockfile) Patches() []turbopath.AnchoredUnixPath {
 }
 
 // DecodeBerryLockfile Takes the contents of a berry lockfile and returns a struct representation
-func DecodeBerryLockfile(contents []byte) (*BerryLockfile, error) {
+func DecodeBerryLockfile(resolutions map[string]string, contents []byte) (*BerryLockfile, error) {
+	parsedResolutions := make(map[berryResolution]string, len(resolutions))
+	for rawResolution, version := range resolutions {
+		resolution, err := parseBerryResolution(rawResolution)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Unable to parse 'resolutions' entry: %s", rawResolution)
+		}
+		parsedResolutions[resolution] = version
+	}
+
 	var packages map[string]*BerryLockfileEntry
 
 	hasCRLF := bytes.HasSuffix(contents, _crlfLiteral)
@@ -694,4 +703,104 @@ func _stringifyDepsMeta(meta map[string]BerryDependencyMetaEntry) string {
 	}
 
 	return strings.Join(lines, "\n")
+}
+
+// Berry resolution grammar comes from
+// https://github.com/yarnpkg/berry/blob/554257087edb4a103633e808253323fb9a21250d/packages/yarnpkg-parsers/sources/grammars/resolution.pegjs
+// The parser is written in the style of a parser combinator, but done by hand
+// since I didn't love the Go parser combinator libraries I saw and pulling in
+// a parser generator seemed overkill for just this simple grammar.
+
+type berryResolution struct {
+	// Optional specific package to scope the dependency change to
+	from berrySpecifier
+	// dependency to change
+	descriptor berrySpecifier
+}
+
+type berrySpecifier struct {
+	// Package name
+	fullName string
+	// Optional constraint
+	description string
+}
+
+func parseBerryResolution(input string) (berryResolution, error) {
+	var resolution berryResolution
+	out, descriptor, err := parseBerrySpecifier(input)
+	if err != nil {
+		return resolution, err
+	}
+	resolution.descriptor = descriptor
+	if len(out) != 0 && out[0] == '/' {
+		from := descriptor
+		descOut, descriptor, err := parseBerrySpecifier(out[1:])
+		if err == nil {
+			resolution.from = from
+			resolution.descriptor = descriptor
+			out = descOut
+		}
+	}
+	if len(out) != 0 {
+		return berryResolution{}, fmt.Errorf("Leftover input when parsing resolution: '%s'", out)
+	}
+	return resolution, nil
+}
+
+func parseBerrySpecifier(input string) (string, berrySpecifier, error) {
+	var specifier berrySpecifier
+	out, fullName, err := parseFullName(input)
+	if err != nil {
+		return input, specifier, errors.Wrapf(err, "Invalid specifier: %s", input)
+	}
+	specifier.fullName = fullName
+	if len(out) != 0 && out[0] == '@' {
+		descOut, description, err := parseDescription(out[1:])
+		// If we happen upon an error we fall back to simple specifier
+		if err != nil {
+			return out, specifier, nil
+		}
+		specifier.description = description
+		out = descOut
+	}
+	return out, specifier, nil
+}
+
+func parseFullName(input string) (out string, fullName string, err error) {
+	if strings.HasPrefix(input, "@") {
+		input1, scope, err := parseIdent(input[1:])
+		if err != nil {
+			return input, "", err
+		}
+		if len(input1) == 0 || input1[0] != '/' {
+			return input, "", fmt.Errorf("Expected to find '/' after '%s' in '%s'", scope, input)
+		}
+		out, name, err := parseIdent(input1[1:])
+		if err != nil {
+			return input, "", err
+		}
+		return out, fmt.Sprintf("@%s/%s", scope, name), nil
+	}
+	return parseIdent(input)
+}
+
+// A string parser produces a parse state with type string
+type stringParser func(string) (string, string, error)
+
+var _identRegexp = regexp.MustCompile("^[^/@]+")
+var _descriptionRegexp = regexp.MustCompile("^[^/]+")
+
+var parseIdent = regexpParser("ident", _identRegexp)
+var parseDescription = regexpParser("description", _descriptionRegexp)
+
+// Takes a regexp and makes a string parser out of it
+func regexpParser(name string, regex *regexp.Regexp) stringParser {
+	return func(input string) (string, string, error) {
+		text := _identRegexp.FindString(input)
+		if text == "" {
+			return input, "", fmt.Errorf("Invalid %s: %s", name, input)
+		}
+		out := input[len(text):]
+		return out, text, nil
+	}
 }
