@@ -1,2 +1,2 @@
-process.env.NONEXISTENT
-process.env.CI
+process.env.NONEXISTENT;
+process.env.CI;
