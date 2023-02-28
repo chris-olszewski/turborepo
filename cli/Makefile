@@ -20,6 +20,9 @@ CLI_DIR = $(shell pwd)
 # allow opting in to the rust codepaths
 GO_TAG ?= go
 
+# this is horid
+CARGO_BUILD_TARGET ?= aarch64-apple-darwin
+
 GO_FILES = $(shell find . -name "*.go")
 SRC_FILES = $(shell find . -name "*.go" | grep -v "_test.go")
 GENERATED_FILES = internal/turbodprotocol/turbod.pb.go internal/turbodprotocol/turbod_grpc.pb.go
@@ -33,7 +36,7 @@ go-turbo$(EXT): $(GENERATED_FILES) $(SRC_FILES) go.mod turborepo-ffi-install
 .PHONY: turborepo-ffi-install
 turborepo-ffi-install: turborepo-ffi
 	cp ../crates/turborepo-ffi/bindings.h ./internal/ffi
-	cp ../crates/turborepo-ffi/target/release/libturborepo_ffi.a ./internal/ffi/libturborepo_ffi_$(UNAME).a
+	cp ../crates/turborepo-ffi/target/$(CARGO_BUILD_TARGET)/release/libturborepo_ffi.a ./internal/ffi/libturborepo_ffi.a
 
 .PHONY: turborepo-ffi-install-win
 turborepo-ffi-install-win: turborepo-ffi-win
@@ -138,7 +141,7 @@ snapshot-turbo-darwin:
 
 .PHONY: build-go-turbo-darwin
 build-go-turbo-darwin: turborepo-ffi-install
-	goreleaser release --rm-dist -f darwin-release.yml
+	goreleaser release --rm-dist -f darwin-release.yml -p 1
 
 .PHONY: build-go-turbo-cross
 build-go-turbo-cross:

@@ -2,10 +2,14 @@ project_name: turbo
 before:
   hooks:
     - make compile-protos
-    - make turborepo-ffi-install
     - go mod tidy
 
 dist: dist-darwin
+# For some reason Goreleaser can only find these if they are global env vars
+env:
+  - CARGO_BUILD_TARGET_darwin_amd64_v1=x86_64-apple-darwin
+  - CARGO_BUILD_TARGET_darwin_arm64=aarch64-apple-darwin
+
 
 builds:
   - id: turbo
@@ -18,6 +22,11 @@ builds:
     ldflags:
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.CommitDate}} -X main.builtBy=goreleaser
     mod_timestamp: "{{ .CommitTimestamp }}"
+    hooks:
+      pre:
+        - cmd: make turborepo-ffi-install
+          env:
+            - 'CARGO_BUILD_TARGET={{ index .Env (print "CARGO_BUILD_TARGET_" .Target) }}'
     env:
       - CGO_ENABLED=1
     targets:

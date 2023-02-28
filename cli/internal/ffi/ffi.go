@@ -4,7 +4,7 @@ package ffi
 
 // #include "bindings.h"
 //
-// #cgo darwin LDFLAGS: -L${SRCDIR} -lturborepo_ffi_Darwin -lz -liconv
+// #cgo darwin LDFLAGS: -L${SRCDIR} -lturborepo_ffi -lz -liconv
 // #cgo linux LDFLAGS: -L${SRCDIR} -lturborepo_ffi_Linux -lz
 // #cgo windows LDFLAGS: -L${SRCDIR} -lturborepo_ffi_Windows -lole32 -lbcrypt -lws2_32 -luserenv
 import "C"
