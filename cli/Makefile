@@ -136,18 +136,6 @@ snapshot-turbo-cross:
 snapshot-turbo-darwin:
 	goreleaser release --snapshot --rm-dist -f darwin-release.yml
 
-.PHONY: snapshot-lib-turbo-darwin
-snapshot-lib-turbo-darwin:
-	goreleaser release --snapshot --rm-dist -f darwin-lib.yml
-
-.PHONY: snapshot-lib-turbo-cross
-snapshot-lib-turbo-cross:
-	goreleaser release --snapshot --rm-dist -f cross-lib.yml
-
-.PHONY: build-lib-turbo-darwin
-build-lib-turbo-darwin:
-	goreleaser release --rm-dist -f darwin-lib.yml
-
 .PHONY: build-go-turbo-darwin
 build-go-turbo-darwin: turborepo-ffi-install
 	goreleaser release --rm-dist -f darwin-release.yml
@@ -155,10 +143,6 @@ build-go-turbo-darwin: turborepo-ffi-install
 .PHONY: build-go-turbo-cross
 build-go-turbo-cross:
 	goreleaser release --rm-dist -f cross-release.yml
-
-.PHONY: build-lib-turbo-cross
-build-lib-turbo-cross:
-	goreleaser release --rm-dist -f cross-lib.yml
 
 .PHONY: stage-release
 stage-release: cmd/turbo/version.go
