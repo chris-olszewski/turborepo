@@ -32,9 +32,9 @@ go-turbo$(EXT): $(GENERATED_FILES) $(SRC_FILES) go.mod turborepo-ffi-install
 
 .PHONY: turborepo-ffi-install
 turborepo-ffi-install: turborepo-ffi
-	cp -r ../crates/turborepo-ffi/bindings.h \
-	      ../crates/turborepo-ffi/target/release/libturborepo_ffi.a \
-	      ./internal/ffi
+	cp ../crates/turborepo-ffi/bindings.h ./internal/ffi
+	cp ../crates/turborepo-ffi/target/release/libturborepo_ffi.a ./internal/ffi/libturborepo_ffi_$(UNAME).a
+
 
 .PHONY: turborepo-ffi
 turborepo-ffi:
@@ -142,7 +142,7 @@ build-lib-turbo-darwin:
 	goreleaser release --rm-dist -f darwin-lib.yml
 
 .PHONY: build-go-turbo-darwin
-build-go-turbo-darwin:
+build-go-turbo-darwin: turborepo-ffi-install
 	goreleaser release --rm-dist -f darwin-release.yml
 
 .PHONY: build-go-turbo-cross
