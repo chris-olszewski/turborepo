@@ -35,10 +35,17 @@ turborepo-ffi-install: turborepo-ffi
 	cp ../crates/turborepo-ffi/bindings.h ./internal/ffi
 	cp ../crates/turborepo-ffi/target/release/libturborepo_ffi.a ./internal/ffi/libturborepo_ffi_$(UNAME).a
 
+.PHONY: turborepo-ffi-install-win
+turborepo-ffi-install-win: turborepo-ffi-win
+	cp ../crates/turborepo-ffi/bindings.h ./internal/ffi
+	cp ../crates/turborepo-ffi/target/release/libturborepo_ffi.a ./internal/ffi/libturborepo_ffi_Windows.a
 
 .PHONY: turborepo-ffi
 turborepo-ffi:
 	cd ../crates/turborepo-ffi && CARGO_TARGET_DIR=./target cargo build --release
+
+turborepo-ffi-win:
+	cd ../crates/turborepo-ffi && CARGO_TARGET_DIR=./target cargo build --release --target x86_64-pc-windows-gnu
 
 .PHONY: turborepo-ffi-proto
 turborepo-ffi-proto:

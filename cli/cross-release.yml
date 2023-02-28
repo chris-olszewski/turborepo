@@ -1,6 +1,8 @@
 project_name: turbo
 before:
   hooks:
+    - make turborepo-ffi-install
+    - make turborepo-ffi-install-win
     - make compile-protos
     - go mod tidy
 
