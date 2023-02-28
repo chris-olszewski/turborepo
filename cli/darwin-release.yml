@@ -2,6 +2,7 @@ project_name: turbo
 before:
   hooks:
     - make compile-protos
+    - make turborepo-ffi-install
     - go mod tidy
 
 dist: dist-darwin
