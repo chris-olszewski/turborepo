@@ -20,8 +20,8 @@ CLI_DIR = $(shell pwd)
 # allow opting in to the rust codepaths
 GO_TAG ?= go
 
-# this is horid
-CARGO_BUILD_TARGET ?= aarch64-apple-darwin
+# Default target to host target if not specified
+CARGO_BUILD_TARGET ?= $(rustc --version --verbose | grep host: | sed 's/host: //')
 
 GO_FILES = $(shell find . -name "*.go")
 SRC_FILES = $(shell find . -name "*.go" | grep -v "_test.go")
