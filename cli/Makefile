@@ -142,11 +142,11 @@ snapshot-turbo-darwin:
 
 .PHONY: build-go-turbo-darwin
 build-go-turbo-darwin: turborepo-ffi-install
-	goreleaser release --rm-dist -f darwin-release.yml -p 1
+	goreleaser release --rm-dist -f darwin-release.yml -p 1 --debug
 
 .PHONY: build-go-turbo-cross
 build-go-turbo-cross:
-	goreleaser release --rm-dist -f cross-release.yml -p 1
+	goreleaser release --rm-dist -f cross-release.yml -p 1 --debug
 
 .PHONY: stage-release
 stage-release: cmd/turbo/version.go
