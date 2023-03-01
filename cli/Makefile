@@ -21,7 +21,8 @@ CLI_DIR = $(shell pwd)
 GO_TAG ?= go
 
 # Default target to host target if not specified
-CARGO_BUILD_TARGET ?= $(rustc --version --verbose | grep host: | sed 's/host: //')
+HOST_CARGO_TARGET = $(shell rustc --version --verbose | grep host: | sed 's/host: //')
+CARGO_BUILD_TARGET ?= $(HOST_CARGO_TARGET)
 
 GO_FILES = $(shell find . -name "*.go")
 SRC_FILES = $(shell find . -name "*.go" | grep -v "_test.go")
@@ -45,7 +46,7 @@ turborepo-ffi-install-win: turborepo-ffi-win
 
 .PHONY: turborepo-ffi
 turborepo-ffi:
-	cd ../crates/turborepo-ffi && CARGO_TARGET_DIR=./target cargo build --release
+	cd ../crates/turborepo-ffi && CARGO_TARGET_DIR=./target cargo build --release --target $(CARGO_BUILD_TARGET)
 
 turborepo-ffi-win:
 	cd ../crates/turborepo-ffi && CARGO_TARGET_DIR=./target cargo build --release --target x86_64-pc-windows-gnu
