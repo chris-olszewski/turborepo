@@ -1,12 +1,15 @@
 project_name: turbo
 before:
   hooks:
-    - make turborepo-ffi-install
-    - make turborepo-ffi-install-win
     - make compile-protos
     - go mod tidy
 
 dist: dist-cross
+
+env:
+  - CARGO_BUILD_TARGET_linux_arm_64=aarch64-unkown-linux-gnu
+  - CARGO_BUILD_TARGET_linux_amd64_v1=x86_64-unknown-linux-gnu
+  - CARGO_BUILD_TARGET_windows_amd64_v1=x86_64-pc-windows-gnu
 
 builds:
   - id: turbo
@@ -19,6 +22,11 @@ builds:
     ldflags:
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.CommitDate}} -X main.builtBy=goreleaser
     mod_timestamp: "{{ .CommitTimestamp }}"
+    hooks:
+      pre:
+        - cmd: make turborepo-ffi-install
+          env:
+            - 'CARGO_BUILD_TARGET={{ index .Env (print "CARGO_BUILD_TARGET_" .Target) }}'
     env:
       - CGO_ENABLED=1
     targets:

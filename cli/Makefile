@@ -146,7 +146,7 @@ build-go-turbo-darwin: turborepo-ffi-install
 
 .PHONY: build-go-turbo-cross
 build-go-turbo-cross:
-	goreleaser release --rm-dist -f cross-release.yml
+	goreleaser release --rm-dist -f cross-release.yml -p 1
 
 .PHONY: stage-release
 stage-release: cmd/turbo/version.go
